@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farm Schedule</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script defer src="js/schedule.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Poppins', sans-serif; }
+    .form-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+    .schedule-card { transition: all 0.3s ease; }
+    .schedule-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .status-completed { opacity: 0.6; }
+    .status-pending { border-left: 4px solid #f59e0b; }
+    .status-overdue { border-left: 4px solid #ef4444; }
+    .status-upcoming { border-left: 4px solid #10b981; }
+    .tab-button:hover { background-color: #f9fafb; }
+    .tab-button.active { border-bottom-color: currentColor; background-color: rgba(102, 126, 234, 0.1); }
+    .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+    .professional-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.05); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-green-50 to-blue-50 min-h-screen" style="background-image: radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.05) 0%, transparent 50%);">
+  <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="bg-white bg-opacity-20 p-2 rounded-lg">
+          <i class="fas fa-piggy-bank text-2xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold">VICAN PIG FARM</h1>
+      </div>
+      <div class="flex space-x-2">
+        <a href="index.html" class="px-4 py-2 rounded-lg font-medium">
+          <i class="fas fa-chart-line mr-2"></i>Dashboard
+        </a>
+        <a href="pigs.html" class="px-4 py-2 rounded-lg font-medium">
+          <i class="fas fa-paw mr-2"></i>Animals
+        </a>
+        <a href="schedule.html" class="px-4 py-2 rounded-lg font-medium bg-white bg-opacity-20">
+          <i class="fas fa-calendar-alt mr-2"></i>Schedule
+        </a>
+        <a href="reports.html" class="px-4 py-2 rounded-lg font-medium">
+          <i class="fas fa-chart-bar mr-2"></i>Reports
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-8 py-8">
+    <div class="mb-6">
+      <a href="index.html" class="inline-flex items-center text-purple-600 font-semibold hover:text-purple-700 mb-4 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+      </a>
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+          <div class="bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-xl shadow-lg">
+            <i class="fas fa-calendar-alt text-white text-2xl"></i>
+          </div>
+          <div>
+            <h1 class="text-4xl font-bold text-gray-800">Farm Schedule</h1>
+            <p class="text-gray-600">Manage feeding, cleaning, and veterinary appointments</p>
+          </div>
+        </div>
+        <button onclick="showScheduleModal()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all">
+          <i class="fas fa-plus mr-2"></i>Add Schedule
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="glass-effect p-5 rounded-xl professional-shadow border-l-4 border-blue-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">Today's Tasks</p>
+            <p id="todayCount" class="text-3xl font-bold text-gray-800">0</p>
+          </div>
+          <i class="fas fa-calendar-day text-3xl text-blue-500"></i>
+        </div>
+      </div>
+      <div class="glass-effect p-5 rounded-xl professional-shadow border-l-4 border-orange-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">Pending Tasks</p>
+            <p id="pendingCount" class="text-3xl font-bold text-gray-800">0</p>
+          </div>
+          <i class="fas fa-clock text-3xl text-orange-500"></i>
+        </div>
+      </div>
+      <div class="glass-effect p-5 rounded-xl professional-shadow border-l-4 border-green-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">Completed Today</p>
+            <p id="completedCount" class="text-3xl font-bold text-gray-800">0</p>
+          </div>
+          <i class="fas fa-check-circle text-3xl text-green-500"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule Type Tabs -->
+    <div class="glass-effect rounded-2xl professional-shadow mb-6">
+      <div class="flex border-b border-gray-200">
+        <button onclick="showScheduleTab('feeding')" id="tab-feeding" class="tab-button flex-1 px-6 py-4 font-semibold text-gray-700 border-b-2 border-green-500 bg-green-50 transition-all">
+          <i class="fas fa-seedling mr-2 text-green-600"></i>Feeding Schedules
+        </button>
+        <button onclick="showScheduleTab('cleaning')" id="tab-cleaning" class="tab-button flex-1 px-6 py-4 font-semibold text-gray-700 border-b-2 border-transparent transition-all">
+          <i class="fas fa-spray-can mr-2 text-blue-600"></i>Cleaning Schedules
+        </button>
+        <button onclick="showScheduleTab('vaccination')" id="tab-vaccination" class="tab-button flex-1 px-6 py-4 font-semibold text-gray-700 border-b-2 border-transparent transition-all">
+          <i class="fas fa-syringe mr-2 text-yellow-600"></i>Vaccination Schedules
+        </button>
+      </div>
+    </div>
+
+    <!-- Feeding Schedules Section -->
+    <div id="feedingSection" class="schedule-section">
+      <div class="glass-effect rounded-2xl professional-shadow p-6 mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-gray-800 flex items-center">
+            <i class="fas fa-seedling mr-2 text-green-600"></i>Feeding Schedules
+          </h2>
+          <span id="feedingCount" class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">0 tasks</span>
+        </div>
+      </div>
+      <div id="feedingList" class="space-y-4">
+        <!-- Feeding schedules will be rendered here -->
+      </div>
+    </div>
+
+    <!-- Cleaning Schedules Section -->
+    <div id="cleaningSection" class="schedule-section hidden">
+      <div class="glass-effect rounded-2xl professional-shadow p-6 mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-gray-800 flex items-center">
+            <i class="fas fa-spray-can mr-2 text-blue-600"></i>Cleaning Schedules
+          </h2>
+          <span id="cleaningCount" class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">0 tasks</span>
+        </div>
+      </div>
+      <div id="cleaningList" class="space-y-4">
+        <!-- Cleaning schedules will be rendered here -->
+      </div>
+    </div>
+
+    <!-- Vaccination Schedules Section -->
+    <div id="vaccinationSection" class="schedule-section hidden">
+      <div class="glass-effect rounded-2xl professional-shadow p-6 mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-gray-800 flex items-center">
+            <i class="fas fa-syringe mr-2 text-yellow-600"></i>Vaccination Schedules
+          </h2>
+          <span id="vaccinationCount" class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">0 tasks</span>
+        </div>
+      </div>
+      <div id="vaccinationList" class="space-y-4">
+        <!-- Vaccination schedules will be rendered here -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Schedule Modal -->
+  <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="glass-effect rounded-2xl professional-shadow p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Add New Schedule</h2>
+        <button onclick="hideScheduleModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times text-2xl"></i>
+        </button>
+      </div>
+      <form id="scheduleForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-tasks mr-2 text-purple-600"></i>Schedule Type
+          </label>
+          <select id="scheduleType" class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-purple-500" required>
+            <option value="">Select Type</option>
+            <option value="feeding">Feeding</option>
+            <option value="cleaning">Cleaning</option>
+            <option value="vaccination">Vaccination</option>
+            <option value="vet">Vet Checkup</option>
+          </select>
+        </div>
+        
+        <div id="pigSelection" class="hidden">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-paw mr-2 text-purple-600"></i>Select Pig (Optional)
+          </label>
+          <select id="selectedPig" class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-purple-500">
+            <option value="">All Pigs</option>
+          </select>
+        </div>
+
+        <div id="vaccinationDetails" class="hidden space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-syringe mr-2 text-purple-600"></i>Vaccine Type
+            </label>
+            <input type="text" id="vaccineType" placeholder="e.g., FMD Vaccine, PRRS Vaccine" class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-purple-500">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-info-circle mr-2 text-purple-600"></i>Dosage/Instructions
+            </label>
+            <input type="text" id="vaccineDosage" placeholder="Enter dosage or instructions" class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-purple-500">
+          </div>
+        </div>
+
+        <div id="feedingDetails" class="hidden space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-seedling mr-2 text-purple-600"></i>Feed Amount (kg)
+            </label>
+            <input type="number" step="0.1" id="feedAmount" placeholder="Enter feed amount" class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-purple-500">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-info-circle mr-2 text-purple-600"></i>Feed Type
+            </label>
+            <input type="text" id="feedType" placeholder="e.g., Starter feed, Grower feed" class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-purple-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-calendar mr-2 text-purple-600"></i>Date
+            </label>
+            <input type="date" id="scheduleDate" class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-purple-500" required>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              <i class="fas fa-clock mr-2 text-purple-600"></i>Time
+            </label>
+            <input type="time" id="scheduleTime" class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-purple-500" required>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-comment mr-2 text-purple-600"></i>Notes
+          </label>
+          <textarea id="scheduleNotes" rows="3" placeholder="Additional notes..." class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-purple-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <i class="fas fa-redo mr-2 text-purple-600"></i>Recurrence
+          </label>
+          <select id="recurrence" class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-purple-500">
+            <option value="none">No Recurrence</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+
+        <div class="flex justify-end space-x-4 mt-6">
+          <button type="button" onclick="hideScheduleModal()" class="px-6 py-2 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+            Cancel
+          </button>
+          <button type="submit" class="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:shadow-lg">
+            <i class="fas fa-save mr-2"></i>Save Schedule
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="bg-gradient-to-br from-gray-50 to-white border-t-2 border-gray-200 mt-12 shadow-lg">
+    <div class="container mx-auto px-8 py-6">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <h3 class="text-lg font-bold text-gray-800 mb-2">VICAN PIG FARM</h3>
+          <p class="text-sm text-gray-600">Professional Pig Farm Management System</p>
+          <p class="text-sm text-gray-500 mt-1">
+            <i class="fas fa-map-marker-alt mr-2 text-purple-600"></i>Embu, Kenya
+          </p>
+        </div>
+        <div class="text-center md:text-right">
+          <p class="text-sm font-semibold text-gray-800 mb-1">
+            <i class="fas fa-user mr-2 text-purple-600"></i>Owner: Agnes Nkonge
+          </p>
+          <p class="text-sm text-gray-600 mb-1">
+            <i class="fas fa-phone mr-2 text-green-600"></i>
+            <a href="tel:0722639583" class="hover:text-purple-600 transition-colors">0722639583</a>
+            <span class="text-xs text-gray-500 ml-2">(For Consultation)</span>
+          </p>
+        </div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-gray-200 text-center">
+        <p class="text-xs text-gray-500">
+          &copy; 2025 All rights reserved to Ian Muthomi
+        </p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+
